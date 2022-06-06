@@ -1,8 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const { Op } = require("sequelize");
 const jwt = require("jsonwebtoken");
-const { User } = require("./models/index");// ./models/index 인데 index에서 User보내줌. 근데 index라 생략가능
+const User = require("./models/user.js");
 const goodsRouter = require("./routes/goods");
 const Joi = require('joi');
 
@@ -50,10 +49,8 @@ router.post("/users", async (req, res) => {
         });
     }
 
-    const existUsers = await User.findAll({
-        where:{
-            [Op.or]: [{ nickname }, { email }],
-        },
+    const existUsers = await User.find({
+        $or: [{ email }, { nickname }], //닉네임이나 이메일이 겹치는거 다 가져와.
     });
 
     if (existUsers.length) {
@@ -62,7 +59,8 @@ router.post("/users", async (req, res) => {
         });
     }
 
-    const user = await User.create({ email, nickname, password });
+    const user = new User({ email, nickname, password });
+    await user.save();
 
     res.status(201).send({});
 });
@@ -81,8 +79,7 @@ router.post("/auth", async (req, res) => {
             errorMessage: "이메일 또는 패스워드가 잘못됐습니다.",
         });
     }
-    
-    const user = await User.findOne({ where: { email, password } });
+    const user = await User.findOne({ email, password }).exec();
 
     //인증 메시지는 친절하지 않아도된다.
     if (!user || password !== user.password) {

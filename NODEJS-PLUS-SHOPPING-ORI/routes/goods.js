@@ -10,13 +10,7 @@ const authMiddleware = require("../middlewares/auth-middleware.js");
 router.get("/", authMiddleware, async (req, res) => {
     const { category } = req.query;
 
-    let goods = null;
-
-    if (category) {
-        goods = await Goods.find({ category }); //find
-    } else {
-        goods = await Goods.find();
-    }
+    const goods = await Goods.find({ category }); //find
 
     res.json({
         goods, // js 객체 초기자

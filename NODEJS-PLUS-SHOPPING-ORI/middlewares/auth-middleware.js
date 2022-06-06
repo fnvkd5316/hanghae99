@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { User } = require("../models/index");
+const User = require("../models/user.js");
 
 
 module.exports = (req, res, next) => {
@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
     try {
         const { userId } = jwt.verify(tokenValue, "customized-secret-key");
 
-        User.findByPk( userId ).then((user) => {
+        User.findById( userId ).exec().then((user) => {
             res.locals.user = user;
             next();
         });
